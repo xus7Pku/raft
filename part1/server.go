@@ -1,12 +1,14 @@
 package raft
 
 import (
-	"time"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"net/rpc"
+	"os"
 	"sync"
+	"time"
 )
 
 type Server struct {
@@ -124,7 +126,7 @@ func (s *Server) DisconnectPeer(peerId int) error {
 	defer s.mu.Unlock()
 
 	if s.peerClients[peerId] != nil {
-		err := s.peerClients.Close()
+		err := s.peerClients[peerId].Close()
 		s.peerClients[peerId] = nil
 		return err
 	}
@@ -143,7 +145,7 @@ func (s *Server) Call(id int, serviceMethod string, args interface{}, reply inte
 	}
 }
 
-func RPCProxy struct {
+type RPCProxy struct {
 	cm *ConsensusModule
 }
 
@@ -178,5 +180,4 @@ func (rpp *RPCProxy) AppendEntries(args AppendEntriesArgs, reply *AppendEntriesR
 		time.Sleep(time.Duration(1+rand.Intn(5)) * time.Millisecond)
 	}
 	return rpp.cm.AppendEntries(args, reply)
-}
 }

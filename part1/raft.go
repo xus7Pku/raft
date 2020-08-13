@@ -146,7 +146,7 @@ type AppendEntriesArgs struct {
 
 	PrevLogIndex int
 	PrevLogTerm  int
-	Entries      []logEntry
+	Entries      []LogEntry
 	LeaderCommit int
 }
 
@@ -242,7 +242,7 @@ func (cm *ConsensusModule) startElection() {
 	for _, peerId := range cm.peerIds {
 		go func(peerId int) {
 			args := RequestVoteArgs{
-				Trem:        savedCurrentTerm,
+				Term:        savedCurrentTerm,
 				CandidateId: cm.id,
 			}
 
@@ -267,7 +267,7 @@ func (cm *ConsensusModule) startElection() {
 				} else if reply.Term == savedCurrentTerm {
 					if reply.VoteGranted {
 						votes := int(atomic.AddInt32(&votesReceived, 1))
-						if vote*2 > len(cm.peerIds)+1 {
+						if votes*2 > len(cm.peerIds)+1 {
 							cm.dlog("以 %d 票数胜选，成为 Leader", votes)
 							cm.startLeader()
 							return
@@ -281,7 +281,7 @@ func (cm *ConsensusModule) startElection() {
 	go cm.runElectionTimer()
 }
 
-func (cm *ConsensusModule) beconeFollower(term int) {
+func (cm *ConsensusModule) becomeFollower(term int) {
 	cm.dlog("变为 Follower，任期 term=%d；日志 log=%v", term, cm.log)
 	cm.state = Follower
 	cm.currentTerm = term
